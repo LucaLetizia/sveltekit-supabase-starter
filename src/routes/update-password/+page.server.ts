@@ -1,7 +1,9 @@
 import { type Session } from '@supabase/supabase-js';
 import type { Actions, PageServerLoad } from './$types';
-import { ZodError, z } from 'zod';
+import { z } from 'zod';
 import { redirect } from '@sveltejs/kit';
+import { message, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const updatePasswordSchema = z
 	.object({
@@ -29,34 +31,28 @@ export const load = (async ({ locals }) => {
 	if (!session) {
 		throw redirect(303, '/');
 	}
-	return {};
+	const form = await superValidate(zod(updatePasswordSchema));
+	return { form };
 }) satisfies PageServerLoad;
 
 export const actions = {
 	default: async ({ request, locals }) => {
 		const formData = Object.fromEntries(await request.formData());
-		try {
-			updatePasswordSchema.parse(formData);
-		} catch (err) {
-			if (err instanceof ZodError) {
-				const { fieldErrors: errors } = err.flatten();
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				return {
-					errors
-				};
-			}
+		const form = await superValidate(formData, zod(updatePasswordSchema));
+		if (!form?.valid) {
+			return { form };
 		}
+
 		const { error } = await locals.supabase.auth.updateUser({
 			password: formData?.password as string
 		});
 
 		if (error) {
-			return {
-				error: 'Something went wrong, please try again later'
-			};
+			return message(form, 'Something went wrong, please try again later', {
+				status: 400
+			});
 		}
-		return {
-			message: 'Password updated successfully'
-		};
+
+		return message(form, 'Password updated successfully');
 	}
 } satisfies Actions;

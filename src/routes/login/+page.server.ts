@@ -1,8 +1,10 @@
 import { AuthApiError, type Session } from '@supabase/supabase-js';
 import type { Actions, PageServerLoad } from './$types';
-import { ZodError, z } from 'zod';
+import { z } from 'zod';
 import { redirect } from '@sveltejs/kit';
 import { checkForProvider } from '$lib/server/auth';
+import { message, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 
 const loginSchema = z.object({
 	email: z.string({ required_error: 'Email is required' }).email(),
@@ -14,27 +16,22 @@ export const load = (async ({ locals }) => {
 	if (session) {
 		throw redirect(303, '/');
 	}
-	return {};
+	const form = await superValidate(zod(loginSchema));
+	return { form };
 }) satisfies PageServerLoad;
 
 export const actions = {
 	login: async ({ request, locals, url }) => {
-		const res = await checkForProvider(url, locals.supabase);
-		if (res?.authError) return { authError: res?.authError };
-
 		const formData = Object.fromEntries(await request.formData());
-		try {
-			loginSchema.parse(formData);
-		} catch (err) {
-			if (err instanceof ZodError) {
-				const { fieldErrors: errors } = err.flatten();
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { password, ...data } = formData;
-				return {
-					data,
-					errors
-				};
-			}
+		const form = await superValidate(formData, zod(loginSchema));
+
+		const res = await checkForProvider(url, locals.supabase);
+		if (res?.authError) {
+			return message(form, res?.authError, { status: 400 });
+		}
+
+		if (!form?.valid) {
+			return { form };
 		}
 
 		const { data: loginData, error: err } =
@@ -45,13 +42,11 @@ export const actions = {
 
 		if (err) {
 			if (err instanceof AuthApiError && err.status === 400) {
-				return {
-					authError: 'Invalid email or password'
-				};
+				return message(form, 'Invalid email or password', { status: 400 });
 			}
-			return {
-				authError: 'Something went wrong. Please try again later'
-			};
+			return message(form, 'Something went wrong. Please try again later', {
+				status: 500
+			});
 		}
 
 		await locals.supabase

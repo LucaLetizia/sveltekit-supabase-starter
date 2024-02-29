@@ -6,11 +6,13 @@
 	import { Label } from '$lib/components/ui/label';
 	import MdiError from '~icons/mdi/error';
 	import MdiInformation from '~icons/mdi/information';
+	import { superForm } from 'sveltekit-superforms';
+	import { page } from '$app/stores';
 
-	import type { PageData } from './$types';
+	export let data;
 
-	export let form;
-	export let data: PageData;
+	const { form, errors, message } = superForm(data?.form);
+	console.log($message);
 </script>
 
 <div class="flex h-screen">
@@ -31,32 +33,34 @@
 							name="email"
 							placeholder="Email address"
 							type="email"
+							value={$form?.email ?? ''}
 							required
 						/>
 					</div>
-					{#if form?.errors?.email}
+					{#if $errors?.email}
 						<div class="flex space-y-1.5">
 							<Label for="email" class="-mt-3 text-xs text-red-600"
-								>{form?.errors?.email}</Label
+								>{$errors?.email}</Label
 							>
 						</div>
 					{/if}
 				</div>
 			</Card.Content>
 			<Card.Footer class="grid w-full items-center gap-2">
-				{#if form?.error}
-					<Alert.Root variant="destructive">
-						<MdiError class="-mt-1"></MdiError>
-						<Alert.Description>{form?.error}</Alert.Description>
-					</Alert.Root>
-				{/if}
-				{#if form?.message}
-					<Alert.Root variant="info">
-						<MdiInformation class="-mt-1"></MdiInformation>
-						<Alert.Description class="text-center"
-							>{form?.message}</Alert.Description
-						>
-					</Alert.Root>
+				{#if $message}
+					{#if $page.status.toString().startsWith('2')}
+						<Alert.Root variant="info">
+							<MdiInformation class="-mt-1"></MdiInformation>
+							<Alert.Description class="text-center"
+								>{$message}</Alert.Description
+							>
+						</Alert.Root>
+					{:else}
+						<Alert.Root variant="destructive">
+							<MdiError class="-mt-1"></MdiError>
+							<Alert.Description>{$message}</Alert.Description>
+						</Alert.Root>
+					{/if}
 				{/if}
 				<Button class="w-full" type="submit">Reset Password</Button>
 			</Card.Footer>

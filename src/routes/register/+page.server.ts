@@ -1,7 +1,9 @@
 import { AuthApiError, type Session } from '@supabase/supabase-js';
 import type { Actions, PageServerLoad } from './$types';
-import { ZodError, z } from 'zod';
+import { z } from 'zod';
 import { redirect } from '@sveltejs/kit';
+import { message, superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
 import { checkForProvider } from '$lib/server/auth';
 
 const registerSchema = z
@@ -40,25 +42,22 @@ export const load = (async ({ locals }) => {
 	if (session) {
 		throw redirect(303, '/');
 	}
-	return {};
+	const form = await superValidate(zod(registerSchema));
+	return { form };
 }) satisfies PageServerLoad;
 
 export const actions = {
 	register: async ({ request, locals, url }) => {
-		await checkForProvider(url, locals.supabase);
 		const formData = Object.fromEntries(await request.formData());
-		try {
-			registerSchema.parse(formData);
-		} catch (err) {
-			if (err instanceof ZodError) {
-				const { fieldErrors: errors } = err.flatten();
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { password, repeatPassword, ...data } = formData;
-				return {
-					data,
-					errors
-				};
-			}
+		const form = await superValidate(formData, zod(registerSchema));
+		const res = await checkForProvider(url, locals.supabase);
+
+		if (res?.authError) {
+			return message(form, res?.authError, { status: 400 });
+		}
+		if (!form.valid) {
+			console.log('INVALID');
+			return { form };
 		}
 
 		const { data: signupData, error: err } = await locals.supabase.auth.signUp({
@@ -68,13 +67,12 @@ export const actions = {
 
 		if (err) {
 			if (err instanceof AuthApiError && err.status === 400) {
-				return {
-					authError: 'Invalid email or password'
-				};
+				return message(form, 'Invalid email or password', { status: 400 });
 			}
-			return {
-				authError: 'Something went wrong. Please try again later'
-			};
+
+			return message(form, 'Something went wrong. Please try again later', {
+				status: 500
+			});
 		}
 
 		const { error: profileError } = await locals.supabase
@@ -87,9 +85,9 @@ export const actions = {
 			});
 
 		if (profileError) {
-			return {
-				authError: 'Something went wrong. Please try again later'
-			};
+			return message(form, 'Something went wrong. Please try again later', {
+				status: 500
+			});
 		}
 
 		await locals.supabase

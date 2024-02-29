@@ -71,6 +71,7 @@
 							>
 						</div>
 					{/if}
+
 					<div>
 						<a href="#" class="hover:underline">Action 2</a>
 					</div>
