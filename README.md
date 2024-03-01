@@ -49,3 +49,4 @@ ALTER TABLE ONLY "public"."profiles"
 - [shadcn-svelte](https://github.com/huntabyte/shadcn-svelte)
 - [unplugin-icons](https://github.com/unplugin/unplugin-icons)
 - [Zod](https://github.com/colinhacks/zod)
+- [Superforms](https://superforms.rocks/)
