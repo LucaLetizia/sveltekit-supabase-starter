@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+  import { page } from '$app/stores';
 
-	export let data;
+  export let data;
 </script>
 
 <div class="h-screen">
-	<h1>{$page?.error?.message}</h1>
+  <h1>{$page?.error?.message}</h1>
 </div>
