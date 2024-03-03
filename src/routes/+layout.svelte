@@ -6,17 +6,17 @@
   import Navbar from '$lib/components/ui/navbar/navbar.svelte';
   import * as Collapsible from '$lib/components/ui/collapsible';
   import { Button } from '$lib/components/ui/button';
-  import { enhance } from '$app/forms';
-  import { PUBLIC_UPDATE_PASSWORD_ROUTE } from '$env/static/public';
-
+  import ProfileSidebar from '$lib/components/ui/profile-sidebar/profile-sidebar.svelte';
   export let data;
 
   let { supabase, session } = data;
   $: ({ supabase, session } = data);
 
-  let footerToggle: HTMLElement | null;
+  let footerToggler: HTMLElement | null;
+  let drawerToggler: HTMLElement | null;
   onMount(() => {
-    footerToggle = document.getElementById('footer-toggle');
+    footerToggler = document?.getElementById('toggle-footer');
+    drawerToggler = document?.getElementById('toggle-profile-drawer');
 
     const { data } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, _session: Session | null) => {
@@ -25,61 +25,46 @@
         }
       },
     );
-
     return () => data.subscription.unsubscribe();
   });
 </script>
 
-<main class="dark text-foreground bg-background">
-  <Navbar {session} {footerToggle}></Navbar>
+<main class="text-foreground bg-background">
+  <Navbar {session} {footerToggler} {drawerToggler}></Navbar>
   <slot />
-
   <div class="space-y-1 w-full fixed bottom-0 z-10 lg:hidden">
-    <Collapsible.Root class="w-[350px] space-y-2">
-      <div class="flex items-center justify-between space-x-4 px-4">
-        <Collapsible.Trigger asChild let:builder>
-          <Button
-            builders={[builder]}
-            variant="ghost"
-            size="sm"
-            class="hidden"
-            id="footer-toggle"
-          ></Button>
-        </Collapsible.Trigger>
-      </div>
-      <Collapsible.Content class="space-y-2">
-        <div
-          class="flex flex-col rounded-md border px-4 py-3 font-mono text-sm w-screen text-center bg-background"
-        >
-          {#if !session}
+    {#if session}
+      <ProfileSidebar></ProfileSidebar>
+    {:else}
+      <Collapsible.Root class="w-[350px] space-y-2">
+        <div class="flex items-center justify-between space-x-4 px-4">
+          <Collapsible.Trigger asChild let:builder>
+            <Button
+              builders={[builder]}
+              variant="ghost"
+              size="sm"
+              class="hidden"
+              id="toggle-footer"
+            ></Button>
+          </Collapsible.Trigger>
+        </div>
+        <Collapsible.Content class="space-y-2">
+          <div
+            class="flex flex-col rounded-md border px-4 py-3 font-mono text-sm w-screen text-center bg-background"
+          >
             <div>
               <a href="/login" class="hover:underline">Log In</a>
             </div>
-          {:else}
-            <div>
-              <form method="POST" action="/logout" use:enhance>
-                <button class="hover:underline" type="submit">Log Out</button>
-              </form>
-            </div>
-          {/if}
 
-          {#if session}
             <div>
-              <a
-                href={`/${PUBLIC_UPDATE_PASSWORD_ROUTE}`}
-                class="hover:underline">Update Password</a
-              >
+              <a href="#" class="hover:underline">Action 2</a>
             </div>
-          {/if}
-
-          <div>
-            <a href="#" class="hover:underline">Action 2</a>
+            <div>
+              <a href="#" class="hover:underline">Action 3</a>
+            </div>
           </div>
-          <div>
-            <a href="#" class="hover:underline">Action 3</a>
-          </div>
-        </div>
-      </Collapsible.Content>
-    </Collapsible.Root>
+        </Collapsible.Content>
+      </Collapsible.Root>
+    {/if}
   </div>
 </main>
