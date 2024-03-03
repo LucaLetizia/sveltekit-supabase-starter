@@ -2,16 +2,17 @@
   import type { Session } from '@supabase/supabase-js';
   import Button from '../button/button.svelte';
   import MdiMenu from '~icons/mdi/menu';
-  import { enhance } from '$app/forms';
-  import { PUBLIC_UPDATE_PASSWORD_ROUTE } from '$env/static/public';
+  import MdiAccountCircle from '~icons/mdi/account-circle';
 
   export let session: Session | null;
-  export let footerToggle: HTMLElement | null;
+  export let footerToggler: HTMLElement | null;
+  export let drawerToggler: HTMLElement | null;
 
   export const handleBurgerMenuClick = () => {
-    if (footerToggle) {
-      footerToggle.click();
-    }
+    if (footerToggler) footerToggler.click();
+  };
+  export const handleDrawerClick = () => {
+    if (drawerToggler) drawerToggler.click();
   };
 </script>
 
@@ -21,24 +22,25 @@
   </a>
 
   <div class="block lg:hidden">
-    <Button
-      class="flex items-center px-3 py-2 border rounded"
-      on:click={handleBurgerMenuClick}
-    >
-      <MdiMenu></MdiMenu>
-    </Button>
+    {#if session}
+      <Button
+        class="flex items-center px-3 py-2 rounded text-2xl"
+        variant="ghost"
+        on:click={handleDrawerClick}
+      >
+        <MdiAccountCircle></MdiAccountCircle>
+      </Button>
+    {:else}
+      <Button
+        class="flex items-center px-3 py-2 border rounded"
+        on:click={handleBurgerMenuClick}
+      >
+        <MdiMenu></MdiMenu>
+      </Button>
+    {/if}
   </div>
   <div class="w-full hidden lg:flex-grow lg:flex lg:items-center lg:w-auto">
     <div class="text-sm lg:flex-grow">
-      {#if session}
-        <a
-          href={`/${PUBLIC_UPDATE_PASSWORD_ROUTE}`}
-          class="block mt-4 lg:inline-block lg:mt-0 mr-4"
-        >
-          Update Password
-        </a>
-      {/if}
-
       <a
         href="#responsive-header"
         class="block mt-4 lg:inline-block lg:mt-0 mr-4"
@@ -51,9 +53,13 @@
     </div>
     <div>
       {#if session}
-        <form method="POST" action="/logout" use:enhance>
-          <Button type="submit">Log Out</Button>
-        </form>
+        <Button
+          class="flex items-center px-3 py-2 rounded text-2xl"
+          variant="ghost"
+          on:click={handleDrawerClick}
+        >
+          <MdiAccountCircle></MdiAccountCircle>
+        </Button>
       {:else}
         <Button href="/login/">Log In</Button>
       {/if}
