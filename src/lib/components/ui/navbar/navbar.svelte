@@ -1,8 +1,13 @@
 <script lang="ts">
   import type { Session } from '@supabase/supabase-js';
   import Button from '../button/button.svelte';
+  import * as Tooltip from '$lib/components/ui/tooltip';
   import MdiMenu from '~icons/mdi/menu';
   import MdiAccountCircle from '~icons/mdi/account-circle';
+  import MdiMoonWaningCrescent from '~icons/mdi/moon-waning-crescent';
+  import MdiWhiteBalanceSunny from '~icons/mdi/white-balance-sunny';
+  import { theme } from '$lib/stores/theme';
+  import { browser } from '$app/environment';
 
   export let session: Session | null;
   export let footerToggler: HTMLElement | null;
@@ -21,22 +26,74 @@
     <span class="font-semibold text-xl tracking-tight">Home Page</span>
   </a>
 
-  <div class="block lg:hidden">
+  <div class="flex items-end lg:hidden">
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild let:builder>
+        {#if $theme === 'dark'}
+          <Button
+            builders={[builder]}
+            class="px-3 py-2 rounded text-xl"
+            variant="ghost"
+            type="button"
+            on:click={() => theme.updateTheme('light')}
+          >
+            {#if browser}
+              <MdiWhiteBalanceSunny></MdiWhiteBalanceSunny>
+            {/if}
+          </Button>
+        {:else}
+          <Button
+            builders={[builder]}
+            class="px-3 py-2 rounded text-xl"
+            variant="ghost"
+            type="button"
+            on:click={() => theme.updateTheme('dark')}
+          >
+            {#if browser}
+              <MdiMoonWaningCrescent></MdiMoonWaningCrescent>
+            {/if}
+          </Button>
+        {/if}
+      </Tooltip.Trigger>
+      <Tooltip.Content>
+        {#if $theme === 'dark'}
+          <p>Lights on!</p>
+        {:else}
+          <p>Lights off!</p>
+        {/if}
+      </Tooltip.Content>
+    </Tooltip.Root>
     {#if session}
-      <Button
-        class="flex items-center px-3 py-2 rounded text-2xl"
-        variant="ghost"
-        on:click={handleDrawerClick}
-      >
-        <MdiAccountCircle></MdiAccountCircle>
-      </Button>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild let:builder>
+          <Button
+            builders={[builder]}
+            class=" px-3 py-2 rounded text-xl"
+            variant="ghost"
+            on:click={handleDrawerClick}
+          >
+            <MdiAccountCircle></MdiAccountCircle>
+          </Button></Tooltip.Trigger
+        >
+        <Tooltip.Content>
+          <p>Profile</p>
+        </Tooltip.Content>
+      </Tooltip.Root>
     {:else}
-      <Button
-        class="flex items-center px-3 py-2 border rounded"
-        on:click={handleBurgerMenuClick}
-      >
-        <MdiMenu></MdiMenu>
-      </Button>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild let:builder>
+          <Button
+            builders={[builder]}
+            class="flex items-center px-3 ml-1 py-2 border rounded text-xl"
+            on:click={handleBurgerMenuClick}
+          >
+            <MdiMenu></MdiMenu>
+          </Button></Tooltip.Trigger
+        >
+        <Tooltip.Content>
+          <p>Menu</p>
+        </Tooltip.Content>
+      </Tooltip.Root>
     {/if}
   </div>
   <div class="w-full hidden lg:flex-grow lg:flex lg:items-center lg:w-auto">
@@ -51,15 +108,59 @@
         Action 3
       </a>
     </div>
-    <div>
+    <div class="lg:flex lg:items-end">
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild let:builder>
+          {#if $theme === 'dark'}
+            <Button
+              builders={[builder]}
+              class="px-3 py-2 rounded text-xl"
+              variant="ghost"
+              type="button"
+              on:click={() => theme.updateTheme('light')}
+            >
+              {#if browser}
+                <MdiWhiteBalanceSunny></MdiWhiteBalanceSunny>
+              {/if}
+            </Button>
+          {:else}
+            <Button
+              builders={[builder]}
+              class="px-3 py-2 rounded text-xl"
+              variant="ghost"
+              type="button"
+              on:click={() => theme.updateTheme('dark')}
+            >
+              {#if browser}
+                <MdiMoonWaningCrescent></MdiMoonWaningCrescent>
+              {/if}
+            </Button>
+          {/if}
+        </Tooltip.Trigger>
+        <Tooltip.Content>
+          {#if $theme === 'dark'}
+            <p>Lights on!</p>
+          {:else}
+            <p>Lights off!</p>
+          {/if}
+        </Tooltip.Content>
+      </Tooltip.Root>
       {#if session}
-        <Button
-          class="flex items-center px-3 py-2 rounded text-2xl"
-          variant="ghost"
-          on:click={handleDrawerClick}
-        >
-          <MdiAccountCircle></MdiAccountCircle>
-        </Button>
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild let:builder>
+            <Button
+              builders={[builder]}
+              class="px-3 py-2 rounded text-xl"
+              variant="ghost"
+              on:click={handleDrawerClick}
+            >
+              <MdiAccountCircle></MdiAccountCircle>
+            </Button></Tooltip.Trigger
+          >
+          <Tooltip.Content>
+            <p>Profile</p>
+          </Tooltip.Content>
+        </Tooltip.Root>
       {:else}
         <Button href="/login/">Log In</Button>
       {/if}

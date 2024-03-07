@@ -32,8 +32,7 @@
           <Button
             class="w-full px-3 py-2 rounded justify-start"
             variant="ghost"
-            type="submit"
-            ><MdiLogout class="mr-1"></MdiLogout>Log Out</Button
+            type="submit"><MdiLogout class="mr-1"></MdiLogout>Log Out</Button
           >
         </form>
       </Sheet.Description>
