@@ -56,7 +56,6 @@ export const actions = {
       return message(form, res?.authError, { status: 400 });
     }
     if (!form.valid) {
-      console.log('INVALID');
       return { form };
     }
 
