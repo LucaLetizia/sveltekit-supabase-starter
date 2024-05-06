@@ -7,8 +7,9 @@
   import * as Collapsible from '$lib/components/ui/collapsible';
   import { Button } from '$lib/components/ui/button';
   import ProfileSidebar from '$lib/components/ui/profile-sidebar/profile-sidebar.svelte';
-  import { theme } from '$lib/stores/theme';
+  import { createThemeStore } from '$lib/stores/theme';
 
+  createThemeStore();
   export let data;
   let { supabase, session } = data;
   $: ({ supabase, session } = data);
