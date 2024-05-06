@@ -6,9 +6,10 @@
   import MdiAccountCircle from '~icons/mdi/account-circle';
   import MdiMoonWaningCrescent from '~icons/mdi/moon-waning-crescent';
   import MdiWhiteBalanceSunny from '~icons/mdi/white-balance-sunny';
-  import { theme } from '$lib/stores/theme';
+  import { getThemeStore } from '$lib/stores/theme';
   import { browser } from '$app/environment';
 
+  const theme = getThemeStore();
   export let session: Session | null;
   export let footerToggler: HTMLElement | null;
   export let drawerToggler: HTMLElement | null;

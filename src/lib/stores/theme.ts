@@ -1,4 +1,6 @@
 import { browser } from '$app/environment';
+import type { ThemeStore } from '$lib/types/stores/theme';
+import { getContext, setContext } from 'svelte';
 import { writable } from 'svelte/store';
 
 const getSystemTheme = () => {
@@ -29,25 +31,30 @@ const getSavedTheme = () => {
   }
 };
 
-const createThemeStore = () => {
-  const theme = getSavedTheme() || getSystemTheme();
-  const { subscribe, set, update } = writable(theme);
+const themeContext = Symbol('themeContext');
 
-  const updateTheme = (theme: string) => {
+export const createThemeStore = () => {
+  const theme = getSavedTheme() || getSystemTheme();
+  const themeStore = writable(theme) as ThemeStore;
+  setContext(themeContext, themeStore);
+
+  themeStore.updateTheme = (theme: string) => {
     saveTheme(theme);
-    update(() => {
+    themeStore.update(() => {
       return theme;
     });
   };
 
-  const resetTheme = () => {
+  themeStore.resetTheme = () => {
     const theme = getSystemTheme();
     if (theme) {
       saveTheme(theme);
-      set(theme);
+      themeStore.set(theme);
     }
   };
-
-  return { subscribe, updateTheme, resetTheme };
+  return themeStore;
 };
-export const theme = createThemeStore();
+
+export const getThemeStore = () => {
+  return getContext<ThemeStore>(themeContext);
+};
